@@ -9,6 +9,8 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Lenovo on 2016/5/26.
@@ -55,6 +57,15 @@ public class AudioPlayer {
     public static final int MSG_PLAY_START = 3;
     public static final int MSG_PLAY_COMPLETE = 4;
 
+    private BlockingQueue<QueueData> mQueue;
+    private DecodeThread mDecodeThread;
+
+    private class QueueData {
+        public boolean isEnding;
+        public byte[] pcmBuff;
+        public int buffLen;
+    }
+
     public static AudioPlayer newInstance(boolean isDecFile) {
         if (mInstance == null) {
             mInstance = new AudioPlayer();
@@ -66,11 +77,12 @@ public class AudioPlayer {
 
     private AudioPlayer() {
         mAudioParam = new AudioParam();
-//        try {
+        try {
+            mQueue = new ArrayBlockingQueue<QueueData>(100);
 //            createAudioTrack();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setDecFile(boolean isDecFile) {
@@ -122,6 +134,11 @@ public class AudioPlayer {
 
     public void startPlay() {
         stopPlay();
+        mQueue.clear();
+        if (mDecodeThread == null) {
+            mDecodeThread = new DecodeThread();
+            mDecodeThread.start();
+        }
         if (mPlayAudioThread == null) {
             mPlayAudioThread = new PlayAudioThread();
             mPlayAudioThread.start();
@@ -129,6 +146,10 @@ public class AudioPlayer {
     }
 
     public void stopPlay() {
+        if (mDecodeThread != null) {
+            mDecodeThread.interrupt();
+            mDecodeThread = null;
+        }
         if (mPlayAudioThread != null) {
             mPlayAudioThread.interrupt();
             mPlayAudioThread = null;
@@ -146,6 +167,41 @@ public class AudioPlayer {
         @Override
         public void run() {
             try {
+                createAudioTrack();
+                mAudioTrack.play();
+                long start = System.currentTimeMillis();
+                while (true) {
+                    QueueData qdata = mQueue.take();
+                    if (qdata != null && qdata.buffLen > 0) {
+                        if (qdata.isEnding) {
+                            break;
+                        } else if (qdata.buffLen > 0) {
+                            mAudioTrack.write(qdata.pcmBuff, 0, qdata.buffLen);
+                        }
+                    }
+                }
+                mAudioTrack.stop();
+                long playEnd = System.currentTimeMillis();
+                if (mHandler != null) {
+                    Message msg = mHandler.obtainMessage();
+                    msg.what = MSG_PLAY_COMPLETE;
+                    msg.arg1 = (int) (playEnd - start);
+                    mHandler.sendMessage(msg);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "PlayAudioThread complete...");
+        }
+    }
+
+    /**
+     *
+     */
+    class DecodeThread extends Thread {
+        @Override
+        public void run() {
+            try {
                 /**
                  * 北京北京8k16bits单声道.pcm
                  冰雨片段8k16bit单声道.pcm
@@ -159,11 +215,11 @@ public class AudioPlayer {
                 String aacPath = "/storage/emulated/0/test.aac";
                 String pcmPath = "/storage/emulated/0/test.pcm";
                 FileInputStream fis = new FileInputStream(aacPath);
-                File pcmFile = new File(pcmPath);
-                if (!pcmFile.exists()) {
-                    pcmFile.createNewFile();
-                }
                 if (isDecFile) {
+                    File pcmFile = new File(pcmPath);
+                    if (!pcmFile.exists()) {
+                        pcmFile.createNewFile();
+                    }
                     long decFileStart = System.currentTimeMillis();
                     if (mHandler != null) {
                         mHandler.sendEmptyMessage(MSG_DEC_AAC_FILE_START);
@@ -187,16 +243,9 @@ public class AudioPlayer {
                 }
 
                 int readCnt = -1;
-                int readOffset = 0;
                 Log.d(TAG, "file size:" + fis.available());
                 boolean initSuccess = false;
-                createAudioTrack();
-                mAudioTrack.play();
                 byte[] file_buff = new byte[mMinBufferSize];
-                long start = System.currentTimeMillis();
-                if (mHandler != null) {
-                    mHandler.sendEmptyMessage(MSG_PLAY_START);
-                }
                 while ((readCnt = fis.read(file_buff, 0, file_buff.length)) > 0) {
                     if (isDecFile) {
                         mAudioTrack.write(file_buff, 0, readCnt);
@@ -210,33 +259,26 @@ public class AudioPlayer {
                         byte[] pcmBuff = LibFaad.decodeAAC(file_buff, readCnt);
                         Log.d(TAG, "dec time:" + (System.currentTimeMillis() - decstart));
                         if (pcmBuff.length > 0) {
-                            long writestart = System.currentTimeMillis();
-                            mAudioTrack.write(pcmBuff, 0, pcmBuff.length);
-                            Log.d(TAG, "write time:" + (System.currentTimeMillis() - writestart));
+                            QueueData qdata = new QueueData();
+                            qdata.pcmBuff = pcmBuff;
+                            qdata.buffLen = pcmBuff.length;
+                            qdata.isEnding = false;
+                            mQueue.put(qdata);
                         }
-                        Log.d(TAG, "pcmBuff.length:" + pcmBuff.length);
                     }
-                    readOffset += readCnt;
-                    Log.d(TAG, "readOffset:" + readOffset);
                 }
                 fis.close();
                 if (!isDecFile) {
                     LibFaad.colseFaad();
                 }
-                mAudioTrack.stop();
-                long playEnd = System.currentTimeMillis();
-                Log.d(TAG, "play time:" + (playEnd - start));
-                if (mHandler != null) {
-                    Message msg = mHandler.obtainMessage();
-                    msg.what = MSG_PLAY_COMPLETE;
-                    msg.arg1 = (int) (playEnd - start);
-                    mHandler.sendMessage(msg);
-                }
+                QueueData qdata = new QueueData();
+                qdata.pcmBuff = new byte[0];
+                qdata.buffLen = qdata.pcmBuff.length;
+                qdata.isEnding = true;
+                mQueue.put(qdata);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "onPlayComplete...");
             }
-            Log.d(TAG, "PlayAudioThread complete...");
         }
     }
 }
