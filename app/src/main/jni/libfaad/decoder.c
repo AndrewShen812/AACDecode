@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "AndroidLog.h"
 #include "mp4.h"
 #include "syntax.h"
 #include "error.h"
@@ -887,7 +888,6 @@ static void* aac_frame_decode(NeAACDecStruct *hDecoder,
         }
     }
 
-
     /* initialize the bitstream */
     faad_initbits(&ld, buffer, buffer_size);
 
@@ -962,7 +962,9 @@ static void* aac_frame_decode(NeAACDecStruct *hDecoder,
         DRM_aac_scalable_main_element(hDecoder, hInfo, &ld, &hDecoder->pce, hDecoder->drc);
     } else {
 #endif
+        //LOGD("before raw_data_block hInfo->error:%d", hInfo->error);
         raw_data_block(hDecoder, hInfo, &ld, &hDecoder->pce, hDecoder->drc);
+        //LOGD("after raw_data_block hInfo->error:%d", hInfo->error);
 #ifdef DRM
     }
 #endif
@@ -1037,7 +1039,6 @@ static void* aac_frame_decode(NeAACDecStruct *hDecoder,
         output_channels = 2;
     }
 #endif
-
     /* Make a channel configuration based on either a PCE or a channelConfiguration */
     create_channel_config(hDecoder, hInfo);
 
@@ -1064,7 +1065,6 @@ static void* aac_frame_decode(NeAACDecStruct *hDecoder,
 #if (defined(PS_DEC) || defined(DRM_PS))
     hInfo->ps = hDecoder->ps_used_global;
 #endif
-
     /* check if frame has channel elements */
     if (channels == 0)
     {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sample_rate_96000" android:title="96000" />
+    <item android:id="@+id/sample_rate_88200" android:title="88200" />
+    <item android:id="@+id/sample_rate_64000" android:title="64000" />
+    <item android:id="@+id/sample_rate_48000" android:title="48000" />
+    <item android:id="@+id/sample_rate_44100" android:title="44100" />
+    <item android:id="@+id/sample_rate_32000" android:title="32000" />
+    <item android:id="@+id/sample_rate_24000" android:title="24000" />
+    <item android:id="@+id/sample_rate_22050" android:title="22050" />
+    <item android:id="@+id/sample_rate_16000" android:title="16000" />
+    <item android:id="@+id/sample_rate_12000" android:title="12000" />
+    <item android:id="@+id/sample_rate_11025" android:title="11025" />
+    <item android:id="@+id/sample_rate_8000" android:title="8000" />
+    <item android:id="@+id/sample_rate_7350" android:title="7350" />
+</menu>

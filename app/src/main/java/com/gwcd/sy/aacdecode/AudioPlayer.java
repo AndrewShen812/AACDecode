@@ -43,34 +43,38 @@ public class AudioPlayer {
     public static final int DEF_SAMPLE_RATE = 44100;
     private final static String TAG = "AudioPlayer";
     private AudioParam mAudioParam;                         // 音频参数
-    private byte[] mData;                               // 音频数据
     private AudioTrack mAudioTrack;                         // AudioTrack对象
     private boolean mBReady = false;                     // 播放源是否就绪
     private PlayAudioThread mPlayAudioThread;               // 播放线程
     private int mMinBufferSize;
 
     private static AudioPlayer mInstance;
-    private boolean isDecFile = false;
     private Handler mHandler = null;
     public static final int MSG_DEC_AAC_FILE_START = 1;
     public static final int MSG_DEC_AAC_FILE_TIME = 2;
     public static final int MSG_PLAY_START = 3;
     public static final int MSG_PLAY_COMPLETE = 4;
+    public static final int MSG_DEC_ERROR = 5;
 
     private BlockingQueue<QueueData> mQueue;
     private DecodeThread mDecodeThread;
+    private String mAacPath;
+    private String mPcmPath;
+    private boolean isDecFile = false;
+    private boolean isPlayFile = false;
+    private int mSampleRate = DEF_SAMPLE_RATE;
 
-    private class QueueData {
+    private static class QueueData {
+        public int seqId;
         public boolean isEnding;
         public byte[] pcmBuff;
         public int buffLen;
     }
 
-    public static AudioPlayer newInstance(boolean isDecFile) {
+    public static AudioPlayer newInstance() {
         if (mInstance == null) {
             mInstance = new AudioPlayer();
         }
-        mInstance.setDecFile(isDecFile);
 
         return mInstance;
     }
@@ -87,23 +91,33 @@ public class AudioPlayer {
 
     public void setDecFile(boolean isDecFile) {
         this.isDecFile = isDecFile;
+        this.isPlayFile = false;
+    }
+
+    public void setPlayFile(boolean isPlayFile) {
+        this.isPlayFile = isPlayFile;
+        this.isDecFile = false;
     }
 
     public void setHandler(Handler handler) {
         this.mHandler = handler;
     }
 
-    public void setDataSource(byte[] data) {
-        mData = data;
+    public void setAacPath(String path) {
+        mAacPath = path;
     }
 
-    public void setDataSource(File aacFile) {
+    public void setPcmPath(String path) {
+        mPcmPath = path;
+    }
 
+    public void setSampleRate(int sampleRate) {
+        this.mSampleRate = sampleRate;
     }
 
     private void createAudioTrack() throws Exception {
         // 获得构建对象的最小缓冲区大小
-        mMinBufferSize = AudioTrack.getMinBufferSize(DEF_SAMPLE_RATE,
+        mMinBufferSize = AudioTrack.getMinBufferSize(mSampleRate,
                 // 获得构建对象的最小缓冲区大小
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
@@ -118,7 +132,7 @@ public class AudioPlayer {
 //               STREAM_SYSTEM：系统声音
 //               STREAM_VOCIE_CALL：电话声音
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                DEF_SAMPLE_RATE,
+                mSampleRate,
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 mMinBufferSize,
@@ -160,8 +174,8 @@ public class AudioPlayer {
         }
     }
 
-    /*
-     *  播放音频的线程
+    /**
+     *  播放音频线程
      */
     class PlayAudioThread extends Thread {
         @Override
@@ -176,7 +190,10 @@ public class AudioPlayer {
                         if (qdata.isEnding) {
                             break;
                         } else if (qdata.buffLen > 0) {
+                            Log.d(TAG, "queue seqId:" + qdata.seqId);
+                            long startWrite = System.currentTimeMillis();
                             mAudioTrack.write(qdata.pcmBuff, 0, qdata.buffLen);
+                            Log.d(TAG, "mAudioTrack.write time:" + (System.currentTimeMillis() - startWrite));
                         }
                     }
                 }
@@ -196,7 +213,7 @@ public class AudioPlayer {
     }
 
     /**
-     *
+     * 解码线程
      */
     class DecodeThread extends Thread {
         @Override
@@ -212,11 +229,11 @@ public class AudioPlayer {
                  浪花一朵朵片段48k16bit单声道.pcm
                  */
 //                String path = "/storage/emulated/0/pcm/冰雨片段48k16bit单声道.pcm";
-                String aacPath = "/storage/emulated/0/test.aac";
-                String pcmPath = "/storage/emulated/0/test.pcm";
-                FileInputStream fis = new FileInputStream(aacPath);
+//                String aacPath = "/storage/emulated/0/aac-pcm/霍元甲.m4a";
+//                String pcmPath = "/storage/emulated/0/aac-pcm/霍元甲.pcm";
+                FileInputStream fis = null;
                 if (isDecFile) {
-                    File pcmFile = new File(pcmPath);
+                    File pcmFile = new File(mPcmPath);
                     if (!pcmFile.exists()) {
                         pcmFile.createNewFile();
                     }
@@ -224,7 +241,7 @@ public class AudioPlayer {
                     if (mHandler != null) {
                         mHandler.sendEmptyMessage(MSG_DEC_AAC_FILE_START);
                     }
-                    int decFileErr = LibFaad.decodeAACFile(aacPath, pcmPath);
+                    int decFileErr = LibFaad.decodeAACFile(mAacPath, mPcmPath);
                     long decFileEnd = System.currentTimeMillis();
                     Log.d(TAG, "dec file time:" + (decFileEnd - decFileStart));
                     if (mHandler != null) {
@@ -237,8 +254,11 @@ public class AudioPlayer {
                         Log.d(TAG, "decodeAACFile failed.");
                         return;
                     }
-                    fis = new FileInputStream(pcmPath);
-                } else {
+                    fis = new FileInputStream(mPcmPath);
+                } else if (isPlayFile) {
+                    fis = new FileInputStream(mPcmPath);
+                } else{
+                    fis = new FileInputStream(mAacPath);
                     LibFaad.openFaad();
                 }
 
@@ -246,9 +266,18 @@ public class AudioPlayer {
                 Log.d(TAG, "file size:" + fis.available());
                 boolean initSuccess = false;
                 byte[] file_buff = new byte[mMinBufferSize];
+                int msgId = 0;
                 while ((readCnt = fis.read(file_buff, 0, file_buff.length)) > 0) {
-                    if (isDecFile) {
-                        mAudioTrack.write(file_buff, 0, readCnt);
+                    if (isDecFile || isPlayFile) {
+                        QueueData qdata = new QueueData();
+                        qdata.seqId = msgId;
+                        qdata.pcmBuff = file_buff;
+                        qdata.buffLen = readCnt;
+                        qdata.isEnding = false;
+                        Log.d(TAG, "queue length:" + mQueue.size());
+                        mQueue.put(qdata);
+                        file_buff = new byte[mMinBufferSize];
+                        msgId++;
                     } else {
                         if (!initSuccess) {
                             int ret = LibFaad.initFaad(file_buff, readCnt, 44100, 1);
@@ -260,10 +289,12 @@ public class AudioPlayer {
                         Log.d(TAG, "dec time:" + (System.currentTimeMillis() - decstart));
                         if (pcmBuff.length > 0) {
                             QueueData qdata = new QueueData();
+                            qdata.seqId = msgId;
                             qdata.pcmBuff = pcmBuff;
                             qdata.buffLen = pcmBuff.length;
                             qdata.isEnding = false;
                             mQueue.put(qdata);
+                            msgId++;
                         }
                     }
                 }
@@ -271,12 +302,14 @@ public class AudioPlayer {
                 if (!isDecFile) {
                     LibFaad.colseFaad();
                 }
+                /** 添加结束包到队列 */
                 QueueData qdata = new QueueData();
                 qdata.pcmBuff = new byte[0];
                 qdata.buffLen = qdata.pcmBuff.length;
                 qdata.isEnding = true;
                 mQueue.put(qdata);
             } catch (Exception e) {
+                mHandler.sendEmptyMessage(MSG_DEC_ERROR);
                 e.printStackTrace();
             }
         }

@@ -1,16 +1,8 @@
-#include "com_gwcd_sy_aacdecode_LibFaad.h"
-#include "neaacdec.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <android/log.h>
-
-#define TAG "LibFaad"
-
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__) // 定义LOGD类型
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG ,__VA_ARGS__) // 定义LOGI类型
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,TAG ,__VA_ARGS__) // 定义LOGW类型
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,TAG ,__VA_ARGS__) // 定义LOGE类型
-#define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,TAG ,__VA_ARGS__) // 定义LOGF类型
+#include "com_gwcd_sy_aacdecode_LibFaad.h"
+#include "neaacdec.h"
+#include "AndroidLog.h"
 
 #define FRAME_MAX_LEN   1024*5
 #define BUFFER_MAX_LEN  1024*1024
@@ -20,7 +12,6 @@
 int get_one_ADTS_frame(unsigned char *buffer, size_t buf_size, unsigned char *data, size_t *data_size);
 
 NeAACDecHandle decHandle;
-NeAACDecConfigurationPtr decConf;
 
 /**
  * Class:     com_gwcd_sy_aacdecode_LibFaad
@@ -30,7 +21,6 @@ NeAACDecConfigurationPtr decConf;
 JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_openFaad
         (JNIEnv *env, jclass cls) {
     decHandle = NeAACDecOpen();
-    decConf = NeAACDecGetCurrentConfiguration(decHandle);
     #if UP_SAMPLE_RATE == 1
         //防止采样频率加倍
         NeAACDecConfigurationPtr conf = NeAACDecGetCurrentConfiguration(decHandle);
@@ -96,7 +86,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAAC
 
         if(frame_info.error > 0)
         {
-            LOGD("error:%s", NeAACDecGetErrorMessage(frame_info.error));
+            LOGD("error:%d, message:%s", frame_info.error, NeAACDecGetErrorMessage(frame_info.error));
         }
         else if(pcm_data && frame_info.samples > 0)
         {

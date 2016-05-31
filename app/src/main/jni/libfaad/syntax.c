@@ -53,6 +53,7 @@
 #include "sbr_syntax.h"
 #endif
 #include "mp4.h"
+#include "AndroidLog.h"
 
 
 /* static function declarations */
@@ -384,6 +385,9 @@ static void decode_cpe(NeAACDecStruct *hDecoder, NeAACDecFrameInfo *hInfo, bitfi
         return;
     }
 
+    LOGD("decode_cpe hDecoder->fr_ch_ele:%d", hDecoder->fr_ch_ele);
+    LOGD("decode_cpe hDecoder->element_output_channels[hDecoder->fr_ch_ele]:%d", hDecoder->element_output_channels[hDecoder->fr_ch_ele]);
+
     /* for CPE the number of output channels is always 2 */
     if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] == 0)
     {
@@ -446,6 +450,7 @@ void raw_data_block(NeAACDecStruct *hDecoder, NeAACDecFrameInfo *hInfo,
                 ele_this_frame++;
                 if (hDecoder->first_syn_ele == 25) hDecoder->first_syn_ele = id_syn_ele;
                 decode_cpe(hDecoder, hInfo, ld, id_syn_ele);
+                LOGD("ID_CPE hInfo->error:%d", hInfo->error);
                 if (hInfo->error > 0)
                     return;
                 break;
@@ -2167,11 +2172,11 @@ static uint16_t extension_payload(bitfile *ld, drc_info *drc, uint16_t count)
         return n;
     case EXT_FILL_DATA:
         /* fill_nibble = */ faad_getbits(ld, 4
-            DEBUGVAR(1,136,"extension_payload(): fill_nibble")); /* must be ‘0000’ */
+            DEBUGVAR(1,136,"extension_payload(): fill_nibble")); /* must be ï¿½0000ï¿½ */
         for (i = 0; i < count-1; i++)
         {
             /* fill_byte[i] = */ faad_getbits(ld, 8
-                DEBUGVAR(1,88,"extension_payload(): fill_byte")); /* must be ‘10100101’ */
+                DEBUGVAR(1,88,"extension_payload(): fill_byte")); /* must be ï¿½10100101ï¿½ */
         }
         return count;
     case EXT_DATA_ELEMENT:
