@@ -9,7 +9,7 @@ LOCAL_SRC_FILES:= 		\
 		cfft.c  	\
 		decoder.c 	\
 		drc.c     	\
-	     	drm_dec.c 	\
+	    drm_dec.c 	\
 		error.c 	\
 		filtbank.c 	\
 		ic_predict.c 	\
@@ -43,6 +43,14 @@ LOCAL_SRC_FILES:= 		\
 		sbr_syntax.c 	\
 		sbr_tf_grid.c 	\
 		sbr_dec.c   \
+		audio.c		\
+		mp4atom.c		\
+		mp4ff.c		\
+		mp4meta.c		\
+		mp4sample.c		\
+		mp4tagupdate.c		\
+		mp4util.c		\
+		aac_decode.c	\
 		com_gwcd_indiacar_utils_AudioDecoder.c
 
 LOCAL_MODULE:= libfaad
