@@ -385,8 +385,8 @@ static void decode_cpe(NeAACDecStruct *hDecoder, NeAACDecFrameInfo *hInfo, bitfi
         return;
     }
 
-    LOGD("decode_cpe hDecoder->fr_ch_ele:%d", hDecoder->fr_ch_ele);
-    LOGD("decode_cpe hDecoder->element_output_channels[hDecoder->fr_ch_ele]:%d", hDecoder->element_output_channels[hDecoder->fr_ch_ele]);
+    //LOGD("decode_cpe hDecoder->fr_ch_ele:%d", hDecoder->fr_ch_ele);
+    //LOGD("decode_cpe hDecoder->element_output_channels[hDecoder->fr_ch_ele]:%d", hDecoder->element_output_channels[hDecoder->fr_ch_ele]);
 
     /* for CPE the number of output channels is always 2 */
     if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] == 0)
@@ -450,7 +450,7 @@ void raw_data_block(NeAACDecStruct *hDecoder, NeAACDecFrameInfo *hInfo,
                 ele_this_frame++;
                 if (hDecoder->first_syn_ele == 25) hDecoder->first_syn_ele = id_syn_ele;
                 decode_cpe(hDecoder, hInfo, ld, id_syn_ele);
-                LOGD("ID_CPE hInfo->error:%d", hInfo->error);
+                //LOGD("ID_CPE hInfo->error:%d", hInfo->error);
                 if (hInfo->error > 0)
                     return;
                 break;

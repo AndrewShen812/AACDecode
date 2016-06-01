@@ -1,8 +1,8 @@
-E:/AAC/AACDecode/app/src/main//obj/local/armeabi/objs/faad/ic_predict.o: \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/ic_predict.c \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/common.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/../config.h \
- E:/AAC/AACDecode/app/src/main//jni/include/neaacdec.h \
+E:/Workspace/AACDecode/app/src/main//obj/local/armeabi/objs/faad/ic_predict.o: \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/ic_predict.c \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/common.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/../config.h \
+ E:/Workspace/AACDecode/app/src/main//jni/include/neaacdec.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/stdio.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/cdefs.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -42,21 +42,21 @@ E:/AAC/AACDecode/app/src/main//obj/local/armeabi/objs/faad/ic_predict.o: \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/machine/limits.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/syslimits.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/asm/page.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/structs.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/cfft.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/sbr_dec.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/ps_dec.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/bits.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/analysis.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/syntax.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/ic_predict.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/pns.h
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/structs.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/cfft.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/sbr_dec.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/ps_dec.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/bits.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/analysis.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/syntax.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/ic_predict.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/pns.h
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/common.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/common.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/../config.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/../config.h:
 
-E:/AAC/AACDecode/app/src/main//jni/include/neaacdec.h:
+E:/Workspace/AACDecode/app/src/main//jni/include/neaacdec.h:
 
 D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/stdio.h:
 
@@ -136,20 +136,20 @@ D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/in
 
 D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/asm/page.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/structs.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/structs.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/cfft.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/cfft.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/sbr_dec.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/sbr_dec.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/ps_dec.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/ps_dec.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/bits.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/bits.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/analysis.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/analysis.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/syntax.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/syntax.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/ic_predict.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/ic_predict.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/pns.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/pns.h:

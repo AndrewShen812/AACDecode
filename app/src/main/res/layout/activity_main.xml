@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="采样率：" />
+            android:text="采样率:" />
 
         <TextView
             android:id="@+id/tv_main_samplerate"
@@ -39,7 +39,27 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:onClick="onClickSampleRate"
-            android:text="选择采样率" />
+            android:text="选择" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="声道:" />
+
+        <TextView
+            android:id="@+id/tv_main_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="1" />
+
+        <Button
+            android:id="@+id/btn_main_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:onClick="onClickChannel"
+            android:text="选择" />
     </LinearLayout>
 
     <LinearLayout

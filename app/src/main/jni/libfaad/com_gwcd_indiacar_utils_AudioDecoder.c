@@ -1,24 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "com_gwcd_sy_aacdecode_LibFaad.h"
+#include "com_gwcd_indiacar_utils_AudioDecoder.h"
 #include "neaacdec.h"
 #include "AndroidLog.h"
 
 #define FRAME_MAX_LEN   1024*5
 #define BUFFER_MAX_LEN  1024*1024
 #define UP_SAMPLE_RATE  1   // 是否提高采样率
-#define CHANNEL_MONO    1   // 是否只采集单通道数据
 
 int get_one_ADTS_frame(unsigned char *buffer, size_t buf_size, unsigned char *data, size_t *data_size);
 
-NeAACDecHandle decHandle;
+static NeAACDecHandle decHandle;
 
-/**
- * Class:     com_gwcd_sy_aacdecode_LibFaad
- * Method:    openFaad
+static int jSampleRate = 44100;
+static int jChannel = 1;
+
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    open
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_openFaad
+JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_open
         (JNIEnv *env, jclass cls) {
     decHandle = NeAACDecOpen();
     #if UP_SAMPLE_RATE == 1
@@ -30,11 +32,11 @@ JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_openFaad
 }
 
 /*
- * Class:     com_gwcd_sy_aacdecode_LibFaad
- * Method:    initFaad
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    init
  * Signature: ([BIII)I
  */
-JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_initFaad
+JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_init
         (JNIEnv *env, jclass cls, jbyteArray aacArr, jint aacLen, jint samplerate, jint channel) {
     //unsigned long aac_size = (*env)->GetArrayLength(evn, aacArr);
     unsigned char *aac_data = (unsigned char *) ((*env)->GetByteArrayElements(env, aacArr, NULL));
@@ -47,21 +49,22 @@ JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_initFaad
         LOGW("init decoder fail!");
         return -1;
     } else {
+        jSampleRate = samplerate;
+        jChannel = channel;
         LOGI("init decoder success!");
         return 0;
     }
 }
 
 /*
- * Class:     com_gwcd_sy_aacdecode_LibFaad
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
  * Method:    decodeAAC
  * Signature: ([BI)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAAC
+JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC
         (JNIEnv *env, jclass cls, jbyteArray aacArr, jint aac_size) {
     unsigned char *buffer = (unsigned char *) ((*env)->GetByteArrayElements(env, aacArr, NULL));
     static unsigned char frame[FRAME_MAX_LEN];
-    static unsigned char frame_mono[FRAME_MAX_LEN];
 
     size_t data_size = aac_size;
     size_t size = 0;
@@ -95,33 +98,37 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAAC
                  frame_info.channels, frame_info.header_type,
                  frame_info.object_type, frame_info.samples,
                  frame_info.samplerate);
-#if CHANNEL_MONO == 1
-            /*从双声道的数据中提取单通道
-             *参考：http://blog.csdn.net/yuan1125/article/details/50668412
-             */
-            int i, j;
-            for(i=0,j=0; i<4096 && j<2048; i+=4, j+=2)
-            {
-                frame_mono[j]=pcm_data[i];
-                frame_mono[j+1]=pcm_data[i+1];
-                pcm_buffer[pcm_total_size + j] = pcm_data[i];
-                pcm_buffer[pcm_total_size + j + 1] = pcm_data[i + 1];
+
+            LOGD("jChannel:%d", jChannel);
+            if (jChannel == 1) {
+                /*从双声道的数据中提取单通道
+                 *参考：http://blog.csdn.net/yuan1125/article/details/50668412
+                 */
+                int i, j;
+                for(i=0,j=0; i<4096 && j<2048; i+=4, j+=2)
+                {
+                    pcm_buffer[pcm_total_size + j] = pcm_data[i];
+                    pcm_buffer[pcm_total_size + j + 1] = pcm_data[i + 1];
+                }
+                pcm_frame_size = frame_info.samples;
+            } else {
+                /*
+                int i, j;
+                for (i=0; i<4096; i++) {
+                    pcm_buffer[pcm_total_size + i] = pcm_data[i];
+                }*/
+                pcm_frame_size = frame_info.samples * frame_info.channels;
+                memcpy(pcm_buffer + pcm_total_size, pcm_data, pcm_frame_size);
             }
-            pcm_frame_size = frame_info.samples;
-#else
-            pcm_frame_size = frame_info.samples * frame_info.channels;
-#endif
             pcm_total_size += pcm_frame_size;
         }
         data_size -= size;
         input_data += size;
     }
-#if CHANNEL_MONO == 1
     LOGD("pcm_total_size:%d", pcm_total_size);
     pcm_array = (*env)->NewByteArray(env, pcm_total_size);
     (*env)->SetByteArrayRegion(env, pcm_array, 0, pcm_total_size, (jbyte *)pcm_buffer);
-#else
-#endif
+
     pcm_data = NULL;
     input_data = NULL;
     buffer = NULL;
@@ -131,12 +138,12 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAAC
 }
 
 /*
- * Class:     com_gwcd_sy_aacdecode_LibFaad
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
  * Method:    decodeAACFile
- * Signature: (Ljava/lang/String;Ljava/lang/String;)I
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
  */
-JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAACFile
-  (JNIEnv *env, jclass cls, jstring aac_file, jstring pcm_file)
+JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
+  (JNIEnv *env, jclass cls, jstring aac_file, jstring pcm_file, jint jsampleRate, jint jchannels)
 {
     static unsigned char frame[FRAME_MAX_LEN];
     static unsigned char frame_mono[FRAME_MAX_LEN];
@@ -209,7 +216,7 @@ JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAACFile
                  frame_info.object_type, frame_info.samples,
                  frame_info.samplerate);
 
-            #if CHANNEL_MONO == 1
+            if (jchannels == 1) {
                 /*从双声道的数据中提取单通道
                  *参考：http://blog.csdn.net/yuan1125/article/details/50668412
                  */
@@ -221,9 +228,9 @@ JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAACFile
                 }
                 write_size += frame_info.samples;
                 fwrite(frame_mono, 1, frame_info.samples, ofile);      //单通道
-            #else
+            } else {
                 fwrite(pcm_data, 1, frame_info.samples * frame_info.channels, ofile);      //多通道
-            #endif
+            }
             fflush(ofile);
         }
         data_size -= size;
@@ -239,11 +246,11 @@ JNIEXPORT jint JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_decodeAACFile
 }
 
 /*
- * Class:     com_gwcd_sy_aacdecode_LibFaad
- * Method:    colseFaad
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    colse
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_gwcd_sy_aacdecode_LibFaad_colseFaad
+JNIEXPORT void JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_colse
         (JNIEnv *env, jclass cls)
 {
     NeAACDecClose(decHandle);
@@ -280,4 +287,3 @@ int get_one_ADTS_frame(unsigned char *buffer, size_t buf_size, unsigned char *da
 
     return 0;
 }
-

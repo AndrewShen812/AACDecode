@@ -1,5 +1,5 @@
-E:/AAC/AACDecode/app/src/main//obj/local/armeabi/objs/faad/drm_dec.o: \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/drm_dec.c \
+E:/Workspace/AACDecode/app/src/main//obj/local/armeabi/objs/faad/drm_dec.o: \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/drm_dec.c \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/stdlib.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/cdefs.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -31,9 +31,9 @@ E:/AAC/AACDecode/app/src/main//obj/local/armeabi/objs/faad/drm_dec.o: \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/machine/limits.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/syslimits.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/asm/page.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/common.h \
- E:/AAC/AACDecode/app/src/main//jni/libfaad/../config.h \
- E:/AAC/AACDecode/app/src/main//jni/include/neaacdec.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/common.h \
+ E:/Workspace/AACDecode/app/src/main//jni/libfaad/../config.h \
+ E:/Workspace/AACDecode/app/src/main//jni/include/neaacdec.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/stat.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/time.h \
  D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/linux/time.h \
@@ -105,11 +105,11 @@ D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/in
 
 D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/asm/page.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/common.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/common.h:
 
-E:/AAC/AACDecode/app/src/main//jni/libfaad/../config.h:
+E:/Workspace/AACDecode/app/src/main//jni/libfaad/../config.h:
 
-E:/AAC/AACDecode/app/src/main//jni/include/neaacdec.h:
+E:/Workspace/AACDecode/app/src/main//jni/include/neaacdec.h:
 
 D:/AndroidDev/android-ndk-r9d-windows-x86_64/platforms/android-3/arch-arm/usr/include/sys/stat.h:
 

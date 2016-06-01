@@ -43,7 +43,7 @@ LOCAL_SRC_FILES:= 		\
 		sbr_syntax.c 	\
 		sbr_tf_grid.c 	\
 		sbr_dec.c   \
-		com_gwcd_sy_aacdecode_LibFaad.c
+		com_gwcd_indiacar_utils_AudioDecoder.c
 
 LOCAL_MODULE:= libfaad
 
