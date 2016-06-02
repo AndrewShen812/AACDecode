@@ -951,19 +951,23 @@ static int decodeMP4file(char *mp4file, char *sndfile, char *adts_fn, int to_std
 
     //objectTypeIndex
     tempnum=mp4ASC.objectTypeIndex;
-    itoa(tempnum,tempstr,10);
+//    itoa(tempnum,tempstr,10);
+    sprintf(tempstr, "%d", tempnum);
     LOGD("MP4 Container-->objectTypeIndex=%s", tempstr);
     //samplingFrequencyIndex
     tempnum=mp4ASC.samplingFrequencyIndex;
-    itoa(tempnum,tempstr,10);
+//    itoa(tempnum,tempstr,10);
+    sprintf(tempstr, "%d", tempnum);
     LOGD("MP4 Container-->samplingFrequencyIndex=%s", tempstr);
     //samplingFrequency
-    itoa(mp4ASC.samplingFrequency,tempstr,10);
+//    itoa(mp4ASC.samplingFrequency,tempstr,10);
+    sprintf(tempstr, "%d", tempnum);
     LOGD("MP4 Container-->samplingFrequency=%s", tempstr);
     memset(tempstr,0,100);
     //channelsConfiguration
     tempnum=mp4ASC.channelsConfiguration;
-    itoa(tempnum,tempstr,10);
+//    itoa(tempnum,tempstr,10);
+    sprintf(tempstr, "%d", tempnum);
     LOGD("MP4 Container-->channelsConfiguration=%s", tempstr);
     free(tempstr);
     //-----------
@@ -1062,6 +1066,7 @@ static int decodeMP4file(char *mp4file, char *sndfile, char *adts_fn, int to_std
             char *tempstr=(char *)malloc(100);
             //声道数
             itoa(frameInfo.channels,tempstr,10);
+            sprintf(tempstr, "%d", tempnum);
             LOGD("FrameInfo-->Channels=%s", tempstr);
             memset(tempstr,0,100);
             //采样率

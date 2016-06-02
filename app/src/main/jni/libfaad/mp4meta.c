@@ -28,13 +28,14 @@
 ** $Id: mp4meta.c,v 1.21 2009/01/19 23:56:30 menno Exp $
 **/
 
+#include "../config.h"
+
 #ifdef USE_TAGGING
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "mp4ffint.h"
-
 
 
 static int32_t mp4ff_tag_add_field(mp4ff_metadata_t *tags, const char *item, const char *value)

@@ -108,6 +108,9 @@
 /* Version number of package */
 #define VERSION "2.7.0"
 
+/* 是否需要解析MP4文件tag信息 */
+#define USE_TAGGING 1
+
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 /* #undef WORDS_BIGENDIAN */
