@@ -20,6 +20,7 @@ public class AudioDecoder {
     public static native int open();
     public static native int init(byte[] buff, int buff_size, int samplerate, int channel);
     public static native byte[] decodeAAC(byte[] aac_buff, int aac_size);
+    public static native byte[] decodeAAC2(byte[] aac_buff, int aac_size);
     public static native int decodeAACFile(String aac_file, String pcm_file, int samplerate, int channel);
     public static native int decodeAACFile2(String aac_file, String pcm_file, int samplerate, int channel);
     public static native void colse();

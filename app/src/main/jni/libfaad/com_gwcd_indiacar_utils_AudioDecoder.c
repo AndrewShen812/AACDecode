@@ -251,6 +251,36 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
 
 /*
  * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    decodeAAC2
+ * Signature: ([BI)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC2
+    (JNIEnv *env, jclass cls, jbyteArray aac_array, jint aac_size)
+{
+    unsigned char *aac_buffer = (unsigned char *) ((*env)->GetByteArrayElements(env, aac_array, NULL));
+    unsigned char header[8];
+    int mp4file = 0;
+    if (!aac_buffer || aac_size < 8) {
+        return NULL;
+    }
+    memcpy(header, aac_buffer, 8);
+    if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p')
+    {
+        mp4file = 1;
+    }
+    if (mp4file) {
+        LOGD("File type-->MP4 Format");
+        LOGD("TODO: decode byte stream from m4a file.");
+    } else {
+        LOGD("File type-->RAW Format");
+        LOGD("TODO: decode byte stream from RAW AAC file.");
+    }
+
+    return NULL;
+}
+
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
  * Method:    decodeAACFile2
  * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
  */

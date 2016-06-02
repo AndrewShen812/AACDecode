@@ -236,18 +236,6 @@ public class AudioPlayer {
         @Override
         public void run() {
             try {
-                /**
-                 * 北京北京8k16bits单声道.pcm
-                 冰雨片段8k16bit单声道.pcm
-                 冰雨片段32k16bit单声道.pcm
-                 冰雨片段48k16bit单声道.pcm
-                 浪花一朵朵片段8k16bit单声道.pcm
-                 浪花一朵朵片段32k16bit单声道.pcm
-                 浪花一朵朵片段48k16bit单声道.pcm
-                 */
-//                String path = "/storage/emulated/0/pcm/冰雨片段48k16bit单声道.pcm";
-//                String aacPath = "/storage/emulated/0/aac-pcm/霍元甲.m4a";
-//                String pcmPath = "/storage/emulated/0/aac-pcm/霍元甲.pcm";
                 FileInputStream fis = null;
                 if (isDecFile) {
                     File pcmFile = new File(mPcmPath);
@@ -299,6 +287,11 @@ public class AudioPlayer {
                         file_buff = new byte[mMinBufferSize];
                         msgId++;
                     } else {
+                        AudioDecoder.decodeAAC2(file_buff, readCnt);
+                        boolean infoTest = true;
+                        if (infoTest) {
+                            return;
+                        }
                         if (!initSuccess) {
 
                             int ret = AudioDecoder.init(file_buff, readCnt, mSampleRate, mChannelInt);

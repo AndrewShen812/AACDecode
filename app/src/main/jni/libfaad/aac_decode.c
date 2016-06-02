@@ -1415,6 +1415,19 @@ int aac_decode(int argc, char *argv[])
                                outputFormat, format, downMatrix, noGapless, infoOnly, adts_out, &length);
     } else {
         LOGD("File type-->RAW Format");
+        LOGD("aacFileName:%s", aacFileName);
+        LOGD("audioFileName:%s", audioFileName);
+        LOGD("adtsFileName:%s", adtsFileName);
+        LOGD("writeToStdio:%d", writeToStdio);
+        LOGD("def_srate:%d", def_srate);
+        LOGD("object_type:%d", object_type);
+        LOGD("outputFormat:%d", outputFormat);
+        LOGD("format:%d", format);
+        LOGD("downMatrix:%d", downMatrix);
+        LOGD("infoOnly:%d", infoOnly);
+        LOGD("adts_out:%d", adts_out);
+        LOGD("old_format:%d", old_format);
+
         result = decodeAACfile(aacFileName, audioFileName, adtsFileName, writeToStdio,
                                def_srate, object_type, outputFormat, format, downMatrix, infoOnly, adts_out,
                                old_format, &length);
