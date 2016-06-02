@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.gwcd.indiacar.utils.AudioDecoder;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -42,7 +44,6 @@ public class AudioPlayer {
 //                         8-15: Reserved
     public static final int DEF_SAMPLE_RATE = 44100;
     private final static String TAG = "AudioPlayer";
-    private AudioParam mAudioParam;                         // 音频参数
     private AudioTrack mAudioTrack;                         // AudioTrack对象
     private boolean mBReady = false;                     // 播放源是否就绪
     private PlayAudioThread mPlayAudioThread;               // 播放线程
@@ -63,6 +64,8 @@ public class AudioPlayer {
     private boolean isDecFile = false;
     private boolean isPlayFile = false;
     private int mSampleRate = DEF_SAMPLE_RATE;
+    private int mChanneConfig = AudioFormat.CHANNEL_OUT_STEREO;
+    private int mChannelInt = 2;
 
     private static class QueueData {
         public int seqId;
@@ -80,7 +83,6 @@ public class AudioPlayer {
     }
 
     private AudioPlayer() {
-        mAudioParam = new AudioParam();
         try {
             mQueue = new ArrayBlockingQueue<QueueData>(100);
 //            createAudioTrack();
@@ -115,11 +117,26 @@ public class AudioPlayer {
         this.mSampleRate = sampleRate;
     }
 
+    public void setChannel(int channel) {
+        mChannelInt = channel;
+        switch (channel) {
+            case 1:
+                mChanneConfig = AudioFormat.CHANNEL_OUT_MONO;
+                break;
+            case 2:
+                mChanneConfig = AudioFormat.CHANNEL_OUT_STEREO;
+                break;
+            default:
+                mChanneConfig = AudioFormat.CHANNEL_OUT_MONO;
+                break;
+        }
+    }
+
     private void createAudioTrack() throws Exception {
         // 获得构建对象的最小缓冲区大小
         mMinBufferSize = AudioTrack.getMinBufferSize(mSampleRate,
                 // 获得构建对象的最小缓冲区大小
-                AudioFormat.CHANNEL_OUT_MONO,
+                mChanneConfig,
                 AudioFormat.ENCODING_PCM_16BIT);
 //        int minSize = 32* 1024;
 //        if (mMinBufferSize < minSize)
@@ -133,7 +150,7 @@ public class AudioPlayer {
 //               STREAM_VOCIE_CALL：电话声音
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                 mSampleRate,
-                AudioFormat.CHANNEL_OUT_MONO,
+                mChanneConfig,
                 AudioFormat.ENCODING_PCM_16BIT,
                 mMinBufferSize,
                 AudioTrack.MODE_STREAM);
@@ -236,12 +253,15 @@ public class AudioPlayer {
                     File pcmFile = new File(mPcmPath);
                     if (!pcmFile.exists()) {
                         pcmFile.createNewFile();
+                    } else {
+                        pcmFile.delete();
+                        pcmFile.createNewFile();
                     }
                     long decFileStart = System.currentTimeMillis();
                     if (mHandler != null) {
                         mHandler.sendEmptyMessage(MSG_DEC_AAC_FILE_START);
                     }
-                    int decFileErr = LibFaad.decodeAACFile(mAacPath, mPcmPath);
+                    int decFileErr = AudioDecoder.decodeAACFile2(mAacPath, mPcmPath, mSampleRate, mChannelInt);
                     long decFileEnd = System.currentTimeMillis();
                     Log.d(TAG, "dec file time:" + (decFileEnd - decFileStart));
                     if (mHandler != null) {
@@ -259,7 +279,7 @@ public class AudioPlayer {
                     fis = new FileInputStream(mPcmPath);
                 } else{
                     fis = new FileInputStream(mAacPath);
-                    LibFaad.openFaad();
+                    AudioDecoder.open();
                 }
 
                 int readCnt = -1;
@@ -280,12 +300,13 @@ public class AudioPlayer {
                         msgId++;
                     } else {
                         if (!initSuccess) {
-                            int ret = LibFaad.initFaad(file_buff, readCnt, 44100, 1);
+
+                            int ret = AudioDecoder.init(file_buff, readCnt, mSampleRate, mChannelInt);
                             initSuccess = ret == 0 ? true : false;
                         }
                         /** AAC解码 */
                         long decstart = System.currentTimeMillis();
-                        byte[] pcmBuff = LibFaad.decodeAAC(file_buff, readCnt);
+                        byte[] pcmBuff = AudioDecoder.decodeAAC(file_buff, readCnt);
                         Log.d(TAG, "dec time:" + (System.currentTimeMillis() - decstart));
                         if (pcmBuff.length > 0) {
                             QueueData qdata = new QueueData();
@@ -300,7 +321,7 @@ public class AudioPlayer {
                 }
                 fis.close();
                 if (!isDecFile) {
-                    LibFaad.colseFaad();
+                    AudioDecoder.colse();
                 }
                 /** 添加结束包到队列 */
                 QueueData qdata = new QueueData();

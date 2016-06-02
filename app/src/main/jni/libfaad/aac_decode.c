@@ -1,4 +1,6 @@
 /*
+ *提取修改自：http://blog.csdn.net/leixiaohua1020/article/details/18155549#html
+ *以下为原作者信息：
  *AAC 码流分析
  *AAC Analysis
  *
@@ -82,7 +84,7 @@ static void faad_fprintf(FILE *stream, const char *fmt, ...)
         vfprintf(stream, fmt, ap);
         //字符串输出
         vsprintf(temp_str,fmt,ap);
-        LOGD("faad_fprintf temp_str:%s", temp_str);
+        LOGD("%s", temp_str);
         va_end(ap);
     }
 }
@@ -624,11 +626,13 @@ static int decodeAACfile(char *aacfile, char *sndfile, char *adts_fn, int to_std
             int tempnum=0;
             char *tempstr=(char *)malloc(100);
             //声道数
-            itoa(frameInfo.channels,tempstr,10);
+            //itoa(frameInfo.channels,tempstr,10);
+            sprintf(tempstr, "%d", frameInfo.channels);
             LOGD("FrameInfo-->Channels=%s", tempstr);
             memset(tempstr,0,100);
             //采样率
-            itoa(frameInfo.samplerate,tempstr,10);
+            //itoa(frameInfo.samplerate,tempstr,10);
+            sprintf(tempstr, "%ld", frameInfo.samplerate);
             LOGD("FrameInfo-->Sample Rate=%s", tempstr);
             memset(tempstr,0,100);
             //AAC类型-------
@@ -914,7 +918,7 @@ static int decodeMP4file(char *mp4file, char *sndfile, char *adts_fn, int to_std
         faad_fprintf(stderr, "%s\t%.3f secs, %d ch, %d Hz\n\n", ot[(mp4ASC.objectTypeIndex > 5)?0:mp4ASC.objectTypeIndex],
                      seconds, mp4ASC.channelsConfiguration, mp4ASC.samplingFrequency);
 
-#define PRINT_MP4_METADATA
+#define PRINT_MP4_METADATA //输出MetaData
 #ifdef PRINT_MP4_METADATA
         j = mp4ff_meta_get_num_items(infile);
         for (k = 0; k < j; k++)
@@ -970,28 +974,6 @@ static int decodeMP4file(char *mp4file, char *sndfile, char *adts_fn, int to_std
     sprintf(tempstr, "%d", tempnum);
     LOGD("MP4 Container-->channelsConfiguration=%s", tempstr);
     free(tempstr);
-    //-----------
-    //输出MetaData
-    //此处使用枚举的方法
-    //-------------
-    int x=0,y=0;
-    char *tag = NULL, *item = NULL;
-    x = mp4ff_meta_get_num_items(infile);
-    for (y = 0; y < x; y++)
-    {
-        if (mp4ff_meta_get_by_index(infile, y, &item, &tag))
-        {
-            if (item != NULL && tag != NULL)
-            {
-                LOGD("MP4 MetaData-->item=%s, tag=%s", item, tag);
-                free(item); item = NULL;
-                free(tag); tag = NULL;
-            }
-        }
-    }
-
-    //-----------
-
 
     for (sampleId = 0; sampleId < numSamples; sampleId++)
     {
@@ -1065,12 +1047,13 @@ static int decodeMP4file(char *mp4file, char *sndfile, char *adts_fn, int to_std
             int tempnum=0;
             char *tempstr=(char *)malloc(100);
             //声道数
-            itoa(frameInfo.channels,tempstr,10);
-            sprintf(tempstr, "%d", tempnum);
+            //itoa(frameInfo.channels,tempstr,10);
+            sprintf(tempstr, "%d", frameInfo.channels);
             LOGD("FrameInfo-->Channels=%s", tempstr);
             memset(tempstr,0,100);
             //采样率
-            itoa(frameInfo.samplerate,tempstr,10);
+            //itoa(frameInfo.samplerate,tempstr,10);
+            sprintf(tempstr, "%ld", frameInfo.samplerate);
             LOGD("FrameInfo-->Sample Rate=%s", tempstr);
             memset(tempstr,0,100);
             //AAC类型-------
@@ -1358,21 +1341,18 @@ int aac_decode(int argc, char *argv[])
     }
 
 
-    faad_fprintf(stderr, " *********** MPEG-4 AAC Decoder V%s ******************\n\n", FAAD2_VERSION);
-    faad_fprintf(stderr, " Build: %s\n", __DATE__);
-    faad_fprintf(stderr, " Modified from faad");
-    faad_fprintf(stderr, " Lei Xiaohua. Communication University of China / Digital TV Technology\n");
-    faad_fprintf(stderr, " leixiaohua1020@126.com\n");
-    faad_fprintf(stderr, " http://blog.csdn.net/leixiaohua1020\n");
+    faad_fprintf(stderr, "************ MPEG-4 AAC Decoder V%s ******************\n\n", FAAD2_VERSION);
     if (cap & FIXED_POINT_CAP)
-        faad_fprintf(stderr, " Fixed point version\n");
-    else
-        faad_fprintf(stderr, " Floating point version\n");
-    faad_fprintf(stderr, "\n");
-    faad_fprintf(stderr, " This program is free software; you can redistribute it and/or modify\n");
-    faad_fprintf(stderr, " it under the terms of the GNU General Public License.\n");
-    faad_fprintf(stderr, "\n");
-    faad_fprintf(stderr, " **************************************************************************\n\n");
+            faad_fprintf(stderr, "Fixed point version. Modified from faad.\n");
+        else
+            faad_fprintf(stderr, "Floating point version. Modified from faad.\n");
+    faad_fprintf(stderr, "Build: %s\n", __DATE__);
+    faad_fprintf(stderr, "Shen Yong. GALAXYWIND Network Systems Co.,Ltd.");
+    faad_fprintf(stderr, "Special thanks to Lei Xiaohua. Communication University of China / Digital TV Technology\n");
+    faad_fprintf(stderr, "leixiaohua1020@126.com\tblog:http://blog.csdn.net/leixiaohua1020\n");
+    faad_fprintf(stderr, "This program is free software; you can redistribute it and/or modify\n");
+    faad_fprintf(stderr, "it under the terms of the GNU General Public License.\n");
+    faad_fprintf(stderr, "**************************************************************************\n\n");
 
 
     /* check that we have at least two non-option arguments */
@@ -1430,11 +1410,11 @@ int aac_decode(int argc, char *argv[])
 
     if (mp4file)
     {
-        LOGD("Container-->MP4 Container Format");
+        LOGD("File type-->MP4 Format");
         result = decodeMP4file(aacFileName, audioFileName, adtsFileName, writeToStdio,
                                outputFormat, format, downMatrix, noGapless, infoOnly, adts_out, &length);
     } else {
-        LOGD("Container-->RAW Format");
+        LOGD("File type-->RAW Format");
         result = decodeAACfile(aacFileName, audioFileName, adtsFileName, writeToStdio,
                                def_srate, object_type, outputFormat, format, downMatrix, infoOnly, adts_out,
                                old_format, &length);
@@ -1456,4 +1436,25 @@ int aac_decode(int argc, char *argv[])
     }
 
     return 0;
+}
+
+unsigned char* aac_decode_byte_stream(unsigned char* aac_buffer, int buffer_size)
+{
+    unsigned char header[8];
+    int mp4file = 0;
+    if (!aac_buffer || buffer_size < 8) {
+        return NULL;
+    }
+    memcpy(header, aac_buffer, 8);
+    if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p')
+    {
+        mp4file = 1;
+    }
+    if (mp4file) {
+        LOGD("File type-->MP4 Format");
+        LOGD("TODO: decode byte stream from m4a file.");
+    } else {
+        LOGD("File type-->RAW Format");
+        LOGD("TODO: decode byte stream from RAW AAC file.");
+    }
 }

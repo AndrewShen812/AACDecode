@@ -6,7 +6,6 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -22,13 +21,17 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private TextView mTvSampleRate;
 
+    private TextView mTvChannel;
+
     private EditText mEtPath;
 
-    private PopupMenu mPopupMenu;
+    private PopupMenu mMenuSampRate;
 
-    private Menu mMenu;
+    private PopupMenu mMenuCh;
 
     private int mSampleRate = 44100;
+
+    private int mChannel = 2;
 
     private int[] mSampRate = new int[]{96000,
             88200,
@@ -75,12 +78,15 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         mEtPath = (EditText) findViewById(R.id.et_main_path);
         mTvSampleRate = (TextView) findViewById(R.id.tv_main_samplerate);
+        mTvChannel = (TextView) findViewById(R.id.tv_main_channel);
         mTvDesc = (TextView) findViewById(R.id.tv_main_desc);
         mEtPath.setText(SharedPrefUtils.newInstance(this).getLastInput());
-        mPopupMenu = new PopupMenu(this, findViewById(R.id.btn_main_samplerate));
-        mMenu = mPopupMenu.getMenu();
-        getMenuInflater().inflate(R.menu.menu_sample_rate, mPopupMenu.getMenu());
-        mPopupMenu.setOnMenuItemClickListener(this);
+        mMenuSampRate = new PopupMenu(this, findViewById(R.id.btn_main_samplerate));
+        mMenuCh = new PopupMenu(this, findViewById(R.id.btn_main_channel));
+        getMenuInflater().inflate(R.menu.menu_sample_rate, mMenuSampRate.getMenu());
+        getMenuInflater().inflate(R.menu.menu_channel, mMenuCh.getMenu());
+        mMenuSampRate.setOnMenuItemClickListener(this);
+        mMenuCh.setOnMenuItemClickListener(this);
 
         mPlayer = AudioPlayer.newInstance();
     }
@@ -109,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setInputCache();
         mPlayer.setDecFile(true);
         mPlayer.setAacPath(path);
-        mPlayer.setPcmPath(path.substring(0, path.lastIndexOf(".")) + ".pcm");
+        mPlayer.setPcmPath(path.substring(0, path.lastIndexOf(".")) + ".aif");
         mPlayer.setHandler(mHandler);
         mPlayer.startPlay();
         mTvDesc.setText("");
@@ -163,7 +169,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     public void onClickSampleRate(View view) {
-        mPopupMenu.show();
+        getMenuInflater().inflate(R.menu.menu_sample_rate, mMenuSampRate.getMenu());
+        mMenuSampRate.show();
     }
 
     @Override
@@ -208,9 +215,21 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             case R.id.sample_rate_7350:
                 mSampleRate = 7350;
                 break;
+            case R.id.channel_1:
+                mChannel = 1;
+                break;
+            case R.id.channel_2:
+                mChannel = 2;
+                break;
         }
+        mPlayer.setChannel(mChannel);
         mPlayer.setSampleRate(mSampleRate);
         mTvSampleRate.setText(mSampleRate + "");
+        mTvChannel.setText(mChannel + "");
         return true;
+    }
+
+    public void onClickChannel(View view) {
+        mMenuCh.show();
     }
 }

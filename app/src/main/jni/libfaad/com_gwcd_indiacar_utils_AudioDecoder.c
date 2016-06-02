@@ -3,6 +3,7 @@
 #include "com_gwcd_indiacar_utils_AudioDecoder.h"
 #include "neaacdec.h"
 #include "AndroidLog.h"
+#include "aac_decode.h"
 
 #define FRAME_MAX_LEN   1024*5
 #define BUFFER_MAX_LEN  1024*1024
@@ -243,6 +244,71 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
     fclose(ofile);
 
     return 0;
+}
+
+//URL长度
+#define MAX_URL_LENGTH 2000
+
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    decodeAACFile2
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile2
+  (JNIEnv *env, jclass cls, jstring aac_file, jstring pcm_file, jint jsampleRate, jint jchannels)
+{
+    const char* src_file = (*env)->GetStringUTFChars(env, aac_file, 0);
+    const char* dst_file = (*env)->GetStringUTFChars(env, pcm_file, 0);
+    LOGD("src_file:%s", src_file);
+    LOGD("dst_file:%s", dst_file);
+    // 检查文件路径
+	if(strcmp(src_file,"") == 0 || strcmp(dst_file,"") == 0){
+	    LOGE("文件路径错误！");
+		return;
+	}
+
+	int argc=6;
+	char **argv=(char **)malloc(MAX_URL_LENGTH);
+	argv[0]=(char *)malloc(MAX_URL_LENGTH);
+	argv[1]=(char *)malloc(MAX_URL_LENGTH);
+	argv[2]=(char *)malloc(MAX_URL_LENGTH);
+	argv[3]=(char *)malloc(MAX_URL_LENGTH);
+	argv[4]=(char *)malloc(MAX_URL_LENGTH);
+	argv[5]=(char *)malloc(MAX_URL_LENGTH);
+
+	strcpy(argv[0],"dummy");
+
+	strcpy(argv[1],"-f");
+	// 输出格式：有WAV和RAW PCM两种，这里默认为RAW PCM
+	//strcpy(argv[2],"1"); // WAV格式
+    strcpy(argv[2],"2"); // RAW PCM格式
+
+	strcpy(argv[3],"-b");
+	/* 采样率：默认16bit
+	1、16 bit pcm data
+	2、24 bit pcm data
+	3、32 bit pcm data
+	4、32 bit floating data
+	5、64 bit floating data
+	*/
+	strcpy(argv[4],"1");
+
+	// 文件路径
+	strcpy(argv[5],src_file);
+
+	// 解码文件和打印输出
+	int dec_ret = aac_decode(argc, argv);
+
+	// 释放内存
+	free(argv[0]);
+	free(argv[1]);
+	free(argv[2]);
+	free(argv[3]);
+	free(argv[4]);
+	free(argv[5]);
+	free(argv);
+
+	return dec_ret;
 }
 
 /*
