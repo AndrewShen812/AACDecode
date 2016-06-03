@@ -258,25 +258,16 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC
     (JNIEnv *env, jclass cls, jbyteArray aac_array, jint aac_size)
 {
     unsigned char *aac_buffer = (unsigned char *) ((*env)->GetByteArrayElements(env, aac_array, NULL));
-    unsigned char header[8];
-    int mp4file = 0;
-    if (!aac_buffer || aac_size < 8) {
-        return NULL;
-    }
-    memcpy(header, aac_buffer, 8);
-    if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p')
-    {
-        mp4file = 1;
-    }
-    if (mp4file) {
-        LOGD("File type-->MP4 Format");
-        LOGD("TODO: decode byte stream from m4a file.");
-    } else {
-        LOGD("File type-->RAW Format");
-        LOGD("TODO: decode byte stream from RAW AAC file.");
+    int pcm_size = 0;
+    unsigned char * pcm_data = decode_aac_byte_stream(aac_buffer, aac_size, &pcm_size);
+    if (!pcm_data && pcm_size > 0) {
+        jbyteArray pcm_array = (*env)->NewByteArray(env, pcm_size);
+        (*env)->SetByteArrayRegion(env, pcm_array, 0, pcm_size, (jbyte *)pcm_data);
+
+        return pcm_array;
     }
 
-    return NULL;
+    return (*env)->NewByteArray(env, 0);
 }
 
 /*

@@ -507,6 +507,11 @@ static int decodeAACfile(char *aacfile, char *sndfile, char *adts_fn, int to_std
     config->downMatrix = downMatrix;
     config->useOldADTSFormat = old_format;
     //config->dontUpSampleImplicitSBR = 1;
+    LOGD("config->defObjectType:%d", config->defObjectType);
+    LOGD("config->defSampleRate:%ld", config->defSampleRate);
+    LOGD("config->outputFormat:%d", config->outputFormat);
+    LOGD("config->downMatrix:%d", config->downMatrix);
+    LOGD("config->useOldADTSFormat:%d", config->useOldADTSFormat);
     NeAACDecSetConfiguration(hDecoder, config);
 
     /* get AAC infos for printing */
@@ -1451,11 +1456,15 @@ int aac_decode(int argc, char *argv[])
     return 0;
 }
 
-unsigned char* aac_decode_byte_stream(unsigned char* aac_buffer, int buffer_size)
+int initDecoder = 0;
+
+unsigned char* decode_aac_byte_stream(unsigned char* aac_buffer, int buffer_size, int* pcm_size)
 {
     unsigned char header[8];
     int mp4file = 0;
-    if (!aac_buffer || buffer_size < 8) {
+    aac_buffer b;
+    memset(&b, 0, sizeof(aac_buffer));
+    if (!aac_buffer || aac_size < 8) {
         return NULL;
     }
     memcpy(header, aac_buffer, 8);
@@ -1469,5 +1478,18 @@ unsigned char* aac_decode_byte_stream(unsigned char* aac_buffer, int buffer_size
     } else {
         LOGD("File type-->RAW Format");
         LOGD("TODO: decode byte stream from RAW AAC file.");
+        if (!initDecoder) {
+            decHandle = NeAACDecOpen();
+            NeAACDecConfigurationPtr config = NeAACDecGetCurrentConfiguration(decHandle);
+            config->defObjectType = LC;
+            LOGD("config->defObjectType:%d", config->defObjectType);
+            LOGD("config->defSampleRate:%ld", config->defSampleRate);
+            LOGD("config->outputFormat:%d", config->outputFormat);
+            LOGD("config->downMatrix:%d", config->downMatrix);
+            LOGD("config->useOldADTSFormat:%d", config->useOldADTSFormat);
+            NeAACDecSetConfiguration(decHandle, config);
+
+            initDecoder = 1;
+        }
     }
 }
