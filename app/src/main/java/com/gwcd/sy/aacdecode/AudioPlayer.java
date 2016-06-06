@@ -163,9 +163,12 @@ public class AudioPlayer {
 //              这种方法对于铃声等内存占用较小，延时要求较高的声音来说很适用。
     }
 
+    private boolean isDecThreadPrepared = false;
+
     public void startPlay() {
         stopPlay();
         mQueue.clear();
+        isDecThreadPrepared = false;
         if (mDecodeThread == null) {
             mDecodeThread = new DecodeThread();
             mDecodeThread.start();
@@ -177,6 +180,7 @@ public class AudioPlayer {
     }
 
     public void stopPlay() {
+        isDecThreadPrepared = false;
         if (mDecodeThread != null) {
             mDecodeThread.interrupt();
             mDecodeThread = null;
@@ -198,6 +202,13 @@ public class AudioPlayer {
         @Override
         public void run() {
             try {
+                while(true) {
+                    if (!isDecThreadPrepared) {
+                        sleep(50);
+                    } else {
+                        break;
+                    }
+                }
                 createAudioTrack();
                 mAudioTrack.play();
                 long start = System.currentTimeMillis();
@@ -249,7 +260,7 @@ public class AudioPlayer {
                     if (mHandler != null) {
                         mHandler.sendEmptyMessage(MSG_DEC_AAC_FILE_START);
                     }
-                    int decFileErr = AudioDecoder.decodeAACFile2(mAacPath, mPcmPath, mSampleRate, mChannelInt);
+                    int decFileErr = AudioDecoder.decodeAACFile(mAacPath, mPcmPath, mSampleRate, mChannelInt);
                     long decFileEnd = System.currentTimeMillis();
                     Log.d(TAG, "dec file time:" + (decFileEnd - decFileStart));
                     if (mHandler != null) {
@@ -275,6 +286,7 @@ public class AudioPlayer {
                 boolean initSuccess = false;
                 byte[] file_buff = new byte[mMinBufferSize];
                 int msgId = 0;
+                isDecThreadPrepared = true;
                 while ((readCnt = fis.read(file_buff, 0, file_buff.length)) > 0) {
                     if (isDecFile || isPlayFile) {
                         QueueData qdata = new QueueData();
@@ -287,15 +299,15 @@ public class AudioPlayer {
                         file_buff = new byte[mMinBufferSize];
                         msgId++;
                     } else {
-                        AudioDecoder.decodeAAC2(file_buff, readCnt);
-                        boolean infoTest = true;
-                        if (infoTest) {
-                            return;
-                        }
+//                        AudioDecoder.decodeAAC2(file_buff, readCnt);
+//                        boolean infoTest = true;
+//                        if (infoTest) {
+//                            return;
+//                        }
                         if (!initSuccess) {
-
                             int ret = AudioDecoder.init(file_buff, readCnt, mSampleRate, mChannelInt);
                             initSuccess = ret == 0 ? true : false;
+                            continue;
                         }
                         /** AAC解码 */
                         long decstart = System.currentTimeMillis();

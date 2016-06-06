@@ -484,6 +484,14 @@ static int decodeAACfile(char *aacfile, char *sndfile, char *adts_fn, int to_std
         b.at_eof = 1;
 
     tagsize = 0;
+    /** 补充资料：
+     * 1、ID3，一般是位于一个mp3文件的开头或末尾的若干字节内，
+     * 附加了关于该mp3的歌手，标题，专辑名称，年代，风格等信息，该信息就被称为ID3信息，
+     * ID3信息分为两个版本，v1和v2版。 其中：v1版的ID3在mp3文件的末尾128字节，
+     * 以TAG三个字符开头，后面跟上歌曲信息。 v2版一般位于mp3的开头，可以存储歌词，该专辑的图片等大容量的信息。
+     * 2、ID3标签是MP3音乐档案中的歌曲附加讯息，它能够在MP3中附加曲子的演出者、作者以及其它类别资讯，方便众多乐曲的管理。
+     * 缺少ID3标签并不会影响 MP3的播放
+     */
     if (!memcmp(b.buffer, "ID3", 3))
     {
         /* high bit is not used */
@@ -1454,42 +1462,4 @@ int aac_decode(int argc, char *argv[])
     }
 
     return 0;
-}
-
-int initDecoder = 0;
-
-unsigned char* decode_aac_byte_stream(unsigned char* aac_buffer, int buffer_size, int* pcm_size)
-{
-    unsigned char header[8];
-    int mp4file = 0;
-    aac_buffer b;
-    memset(&b, 0, sizeof(aac_buffer));
-    if (!aac_buffer || aac_size < 8) {
-        return NULL;
-    }
-    memcpy(header, aac_buffer, 8);
-    if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p')
-    {
-        mp4file = 1;
-    }
-    if (mp4file) {
-        LOGD("File type-->MP4 Format");
-        LOGD("TODO: decode byte stream from m4a file.");
-    } else {
-        LOGD("File type-->RAW Format");
-        LOGD("TODO: decode byte stream from RAW AAC file.");
-        if (!initDecoder) {
-            decHandle = NeAACDecOpen();
-            NeAACDecConfigurationPtr config = NeAACDecGetCurrentConfiguration(decHandle);
-            config->defObjectType = LC;
-            LOGD("config->defObjectType:%d", config->defObjectType);
-            LOGD("config->defSampleRate:%ld", config->defSampleRate);
-            LOGD("config->outputFormat:%d", config->outputFormat);
-            LOGD("config->downMatrix:%d", config->downMatrix);
-            LOGD("config->useOldADTSFormat:%d", config->useOldADTSFormat);
-            NeAACDecSetConfiguration(decHandle, config);
-
-            initDecoder = 1;
-        }
-    }
 }

@@ -33,14 +33,6 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC
 
 /*
  * Class:     com_gwcd_indiacar_utils_AudioDecoder
- * Method:    decodeAAC2
- * Signature: ([BI)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC2
-  (JNIEnv *, jclass, jbyteArray, jint);
-
-/*
- * Class:     com_gwcd_indiacar_utils_AudioDecoder
  * Method:    decodeAACFile
  * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
  */
@@ -54,6 +46,14 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
  */
 JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile2
   (JNIEnv *, jclass, jstring, jstring, jint, jint);
+
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    getAACFileInfo
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_getAACFileInfo
+        (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     com_gwcd_indiacar_utils_AudioDecoder

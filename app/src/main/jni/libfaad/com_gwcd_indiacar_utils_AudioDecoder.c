@@ -71,7 +71,6 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC
     size_t size = 0;
 
     NeAACDecFrameInfo frame_info;
-    unsigned char* input_data = buffer;
     unsigned char* pcm_data = NULL;
     jbyteArray pcm_array = (*env)->NewByteArray(env, 0);
     if(get_one_ADTS_frame(buffer, data_size, frame, &size) < 0)
@@ -83,14 +82,14 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC
     int pcm_total_size = 0;
     int pcm_frame_size = 0;
     unsigned char* pcm_buffer = (unsigned char*) malloc(1024 * 512);
-    while(get_one_ADTS_frame(input_data, data_size, frame, &size) == 0)
+    while(get_one_ADTS_frame(buffer, data_size, frame, &size) == 0)
     {
         //decode ADTS frame
         pcm_data = (unsigned char*)NeAACDecDecode(decHandle, &frame_info, frame, size);
 
         if(frame_info.error > 0)
         {
-            LOGD("error:%d, message:%s", frame_info.error, NeAACDecGetErrorMessage(frame_info.error));
+            LOGE("error:%d, message:%s", frame_info.error, NeAACDecGetErrorMessage(frame_info.error));
         }
         else if(pcm_data && frame_info.samples > 0)
         {
@@ -124,16 +123,17 @@ JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC
             pcm_total_size += pcm_frame_size;
         }
         data_size -= size;
-        input_data += size;
+        buffer += size;
     }
     LOGD("pcm_total_size:%d", pcm_total_size);
     pcm_array = (*env)->NewByteArray(env, pcm_total_size);
     (*env)->SetByteArrayRegion(env, pcm_array, 0, pcm_total_size, (jbyte *)pcm_buffer);
 
-    pcm_data = NULL;
-    input_data = NULL;
-    buffer = NULL;
+//    free(pcm_data);
+//    free(buffer);
     free(pcm_buffer);
+    pcm_data = NULL;
+    buffer = NULL;
     pcm_buffer = NULL;
     return pcm_array;
 }
@@ -178,7 +178,6 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
 
     data_size = fread(buffer, 1, BUFFER_MAX_LEN, ifile);
     LOGD("data_size:%d", data_size);
-    //open decoder
     decoder = NeAACDecOpen();
     if(get_one_ADTS_frame(buffer, data_size, frame, &size) < 0)
     {
@@ -207,7 +206,7 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
 
         if(frame_info.error > 0)
         {
-            LOGD("error:%s", NeAACDecGetErrorMessage(frame_info.error));
+            LOGE("error:%s", NeAACDecGetErrorMessage(frame_info.error));
         }
         else if(pcm_data && frame_info.samples > 0)
         {
@@ -230,6 +229,7 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
                 write_size += frame_info.samples;
                 fwrite(frame_mono, 1, frame_info.samples, ofile);      //单通道
             } else {
+                write_size += frame_info.samples * frame_info.channels;
                 fwrite(pcm_data, 1, frame_info.samples * frame_info.channels, ofile);      //多通道
             }
             fflush(ofile);
@@ -248,27 +248,6 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile
 
 //URL长度
 #define MAX_URL_LENGTH 2000
-
-/*
- * Class:     com_gwcd_indiacar_utils_AudioDecoder
- * Method:    decodeAAC2
- * Signature: ([BI)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAAC2
-    (JNIEnv *env, jclass cls, jbyteArray aac_array, jint aac_size)
-{
-    unsigned char *aac_buffer = (unsigned char *) ((*env)->GetByteArrayElements(env, aac_array, NULL));
-    int pcm_size = 0;
-    unsigned char * pcm_data = decode_aac_byte_stream(aac_buffer, aac_size, &pcm_size);
-    if (!pcm_data && pcm_size > 0) {
-        jbyteArray pcm_array = (*env)->NewByteArray(env, pcm_size);
-        (*env)->SetByteArrayRegion(env, pcm_array, 0, pcm_size, (jbyte *)pcm_data);
-
-        return pcm_array;
-    }
-
-    return (*env)->NewByteArray(env, 0);
-}
 
 /*
  * Class:     com_gwcd_indiacar_utils_AudioDecoder
@@ -330,6 +309,34 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile2
 	free(argv);
 
 	return dec_ret;
+}
+
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    getAACFileInfo
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_getAACFileInfo
+    (JNIEnv *env, jclass clazz, jstring file_path)
+{
+    FILE* aac_file;
+    const char* aac_path = (*env)->GetStringUTFChars(env, file_path, 0);
+    LOGD("file path:%s", aac_path);
+    aac_file = fopen(aac_path, "rb");
+    if (!aac_file) {
+        LOGE("open aac file error");
+        return -1;
+    }
+    unsigned char header[8];
+    fread(header, 1, 8, aac_file);
+    // 头部有ftypxxx，是MPEG-4规范的文件
+    if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p'){
+        LOGD("file type: MPEG-4 AAC(.m4a)");
+    } else {
+        LOGD("file type: MPEG-2 AAC(.aac)");
+        LOGD("TODO:解析头部类型");
+    }
+    fclose(aac_file);
 }
 
 /*

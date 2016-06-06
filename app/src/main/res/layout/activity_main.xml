@@ -70,6 +70,12 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onClickFileInfo"
+            android:text="获取文件信息" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:onClick="onClickDecAAC"
             android:text="解码数据流" />
 

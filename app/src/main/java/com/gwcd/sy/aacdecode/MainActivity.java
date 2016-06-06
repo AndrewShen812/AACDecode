@@ -13,6 +13,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gwcd.indiacar.utils.AudioDecoder;
+
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private AudioPlayer mPlayer;
@@ -89,6 +91,16 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         mMenuCh.setOnMenuItemClickListener(this);
 
         mPlayer = AudioPlayer.newInstance();
+    }
+
+    public void onClickFileInfo(View view) {
+        String path = mEtPath.getText().toString().trim();
+        if (TextUtils.isEmpty(path) || !path.startsWith("/storage/emulated/0/aac-pcm/")) {
+            Toast.makeText(MainActivity.this, "路径不对", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        setInputCache();
+        AudioDecoder.getAACFileInfo(path);
     }
 
     public void onClickDecAAC(View view) {
@@ -232,4 +244,5 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public void onClickChannel(View view) {
         mMenuCh.show();
     }
+
 }
