@@ -4,6 +4,7 @@
 #include "neaacdec.h"
 #include "AndroidLog.h"
 #include "aac_decode.h"
+#include "mp3_info_decoder.h"
 
 #define FRAME_MAX_LEN   1024*5
 #define BUFFER_MAX_LEN  1024*1024
@@ -348,6 +349,19 @@ JNIEXPORT void JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_colse
         (JNIEnv *env, jclass cls)
 {
     NeAACDecClose(decHandle);
+}
+
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    mp3Info
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_mp3Info
+        (JNIEnv *env, jclass cls, jstring file_path)
+{
+    const char* path = (*env)->GetStringUTFChars(env, file_path, 0);
+    LOGD("file path:%s", path);
+    print_mp3_info(path);
 }
 
 int get_one_ADTS_frame(unsigned char *buffer, size_t buf_size, unsigned char *data, size_t *data_size)

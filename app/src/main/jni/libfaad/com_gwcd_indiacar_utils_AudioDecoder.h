@@ -63,6 +63,14 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_getAACFileInfo
 JNIEXPORT void JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_colse
   (JNIEnv *, jclass);
 
+/*
+ * Class:     com_gwcd_indiacar_utils_AudioDecoder
+ * Method:    mp3Info
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_mp3Info
+        (JNIEnv *env, jclass cls, jstring file_path);
+
 #ifdef __cplusplus
 }
 #endif

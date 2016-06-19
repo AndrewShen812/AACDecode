@@ -24,5 +24,6 @@ public class AudioDecoder {
     public static native int decodeAACFile(String aac_file, String pcm_file, int samplerate, int channel);
     public static native int decodeAACFile2(String aac_file, String pcm_file, int samplerate, int channel);
     public static native void colse();
+    public static native void mp3Info(String mp3File);
 
 }

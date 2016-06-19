@@ -51,6 +51,7 @@ LOCAL_SRC_FILES:= 		\
 		mp4tagupdate.c		\
 		mp4util.c		\
 		aac_decode.c	\
+		mp3_info_decoder.c	\
 		com_gwcd_indiacar_utils_AudioDecoder.c
 
 LOCAL_MODULE:= libfaad
