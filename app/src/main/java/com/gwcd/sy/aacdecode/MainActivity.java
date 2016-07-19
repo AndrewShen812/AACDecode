@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void onClickFileInfo(View view) {
         String path = mEtPath.getText().toString().trim();
-        if (TextUtils.isEmpty(path) || !path.startsWith("/storage/emulated/0/aac-pcm/")) {
+        if (TextUtils.isEmpty(path)) {
             Toast.makeText(MainActivity.this, "路径不对", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void onClickDecAAC(View view) {
         String path = mEtPath.getText().toString().trim();
-        if (TextUtils.isEmpty(path) || !path.startsWith("/storage/emulated/0/aac-pcm/")) {
+        if (TextUtils.isEmpty(path)) {
             Toast.makeText(MainActivity.this, "路径不对", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void onClickDecFile(View view) {
         String path = mEtPath.getText().toString().trim();
-        if (TextUtils.isEmpty(path) || !path.startsWith("/storage/emulated/0/aac-pcm/")) {
+        if (TextUtils.isEmpty(path)) {
             Toast.makeText(MainActivity.this, "路径不对", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void onClickPlayFile(View view) {
         String path = mEtPath.getText().toString().trim();
-        if (TextUtils.isEmpty(path) || !path.startsWith("/storage/emulated/0/aac-pcm/")) {
+        if (TextUtils.isEmpty(path)) {
             Toast.makeText(MainActivity.this, "路径不对", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private void setInputCache() {
         String path = mEtPath.getText().toString().trim();
-        if (!TextUtils.isEmpty(path) && path.startsWith("/storage/emulated/0/aac-pcm/")) {
+        if (!TextUtils.isEmpty(path)) {
             SharedPrefUtils.newInstance(this).setLastInput(path);
         }
     }
@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void onClickSongInfo(View view) {
         String path = mEtPath.getText().toString().trim();
-        if (TextUtils.isEmpty(path) || !path.startsWith("/storage/emulated/0/aac-pcm/")) {
+        if (TextUtils.isEmpty(path)) {
             Toast.makeText(MainActivity.this, "路径不对", Toast.LENGTH_SHORT).show();
             return;
         }
