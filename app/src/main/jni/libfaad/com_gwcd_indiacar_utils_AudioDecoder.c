@@ -265,7 +265,7 @@ JNIEXPORT jint JNICALL Java_com_gwcd_indiacar_utils_AudioDecoder_decodeAACFile2
     // 检查文件路径
 	if(strcmp(src_file,"") == 0 || strcmp(dst_file,"") == 0){
 	    LOGE("文件路径错误！");
-		return;
+		return -1;
 	}
 
 	int argc=6;

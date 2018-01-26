@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "com.gwcd.sy.aacdecode"
@@ -10,6 +10,13 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters 'armeabi', 'armeabi-v7a'
+                arguments "NDK_LIBS_OUT=src/main/jniLibs"
+            }
+        }
     }
     buildTypes {
         release {
@@ -21,6 +28,11 @@ android {
     sourceSets {
         main {
             jni.srcDirs = []
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
         }
     }
 }

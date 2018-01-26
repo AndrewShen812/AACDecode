@@ -181,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     public void onClickSampleRate(View view) {
-        getMenuInflater().inflate(R.menu.menu_sample_rate, mMenuSampRate.getMenu());
         mMenuSampRate.show();
     }
 
